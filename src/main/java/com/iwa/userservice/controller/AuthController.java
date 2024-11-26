@@ -51,7 +51,11 @@ public class AuthController {
 
         // Si tout est valide, générer et retourner le token JWT
         String token = jwtTokenUtil.generateAccessToken(user.get().getId());
-        return ResponseEntity.ok(Map.of("token", token));
+        // Renvoyer le token et l'ID de l'utilisateur
+        return ResponseEntity.ok(Map.of(
+                "token", token,
+                "userId", user.get().getId()
+        ));
     }
 
 }
