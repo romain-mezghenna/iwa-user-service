@@ -25,9 +25,16 @@ public class AuthController {
     private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @PostMapping("/register")
-    public User register(@RequestBody User user) {
+    public ResponseEntity<?> register(@RequestBody User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userService.createUser(user);
+        try {
+            User u;
+            u = userService.createUser(user);
+            return ResponseEntity.ok(u);
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "Email déjà utilisé"));
+        }
     }
 
     @PostMapping("/login")
