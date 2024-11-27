@@ -1,6 +1,7 @@
 package com.iwa.userservice.controller;
 import com.iwa.userservice.security.JwtTokenUtil;
 import com.netflix.discovery.converters.Auto;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import com.iwa.userservice.model.User;
 import com.iwa.userservice.service.UserService;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
@@ -54,6 +56,18 @@ public class UserController {
         // Rechercher l'utilisateur avec l'ID extrait
         return userService.getUserById(userId)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+    }
+
+    @GetMapping("/{id}/details")
+    public ResponseEntity<?> getUserDetails(@PathVariable Long id) {
+        // Rechercher l'utilisateur avec l'ID fourni
+        return userService.getUserById(id)
+                .map(user -> ResponseEntity.ok(Map.of(
+                        "nom", user.getNom(),
+                        "prenom", user.getPrenom(),
+                        "photo", user.getPhoto()
+                )))
+                .orElseGet(() -> ResponseEntity.status(404).body(Map.of("message","Utilisateur non trouvé")));
     }
 
     @DeleteMapping("/{id}")
