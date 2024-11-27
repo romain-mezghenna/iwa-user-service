@@ -1,4 +1,6 @@
 package com.iwa.userservice.controller;
+import com.iwa.userservice.security.JwtTokenUtil;
+import com.netflix.discovery.converters.Auto;
 import org.springframework.security.core.Authentication;
 import com.iwa.userservice.model.User;
 import com.iwa.userservice.service.UserService;
@@ -13,6 +15,11 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
+
+
 
     @PostMapping
     public User createUser(@RequestBody User user) {
@@ -34,6 +41,19 @@ public class UserController {
     @PutMapping("/{id}")
     public User updateUser(@PathVariable Long id, @RequestBody User userDetails) {
         return userService.updateUser(id, userDetails);
+    }
+
+    @GetMapping("/profile")
+    public User getUserProfile(@RequestHeader("Authorization") String token) {
+        // Extraire le JWT (supprimer le préfixe "Bearer ")
+        String jwt = token.replace("Bearer ", "");
+
+        // Décoder le JWT pour obtenir l'ID utilisateur
+        Long userId = jwtTokenUtil.getUserId(jwt);
+
+        // Rechercher l'utilisateur avec l'ID extrait
+        return userService.getUserById(userId)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
     }
 
     @DeleteMapping("/{id}")
